@@ -24,10 +24,21 @@ function App({ store }) {
             <div key={item.code} className="List-item">
               <div
                 className={'Item' + (item.selected ? ' Item_selected' : '')}
-                onClick={() => store.selectItem(item.code)}
+                onClick={e => {
+                  if (e.target.tagName === 'BUTTON') return;
+                  store.selectItem(item.code);
+                }}
               >
                 <div className="Item-code">{item.code}</div>
-                <div className="Item-title">{item.title}</div>
+                <div className="Item-title">
+                  {item.title}
+                  {item.highlighted ? (
+                    <span className="Item-highlighted"> | Выделено: {item.highlighted}</span>
+                  ) : (
+                    ''
+                  )}
+                </div>
+
                 <div className="Item-actions">
                   <button onClick={() => store.deleteItem(item.code)}>Удалить</button>
                 </div>

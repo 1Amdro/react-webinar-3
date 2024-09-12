@@ -20,6 +20,8 @@ class Store {
     };
   }
 
+  codeFormat() {}
+
   /**
    * Выбор состояния
    * @returns {Object}
@@ -44,7 +46,23 @@ class Store {
   addItem() {
     this.setState({
       ...this.state,
-      list: [...this.state.list, { code: this.state.list.length + 1, title: 'Новая запись' }],
+
+      list: [
+        ...this.state.list,
+        { code: this.state.list.length + 1, highlighted: 0, title: 'Новая запись' },
+      ],
+    });
+  }
+
+  updatesCodes() {
+    this.setState({
+      ...this.state,
+      list: this.state.list.map((item, index) => {
+        return {
+          ...item,
+          code: index + 1,
+        };
+      }),
     });
   }
 
@@ -57,6 +75,7 @@ class Store {
       ...this.state,
       list: this.state.list.filter(item => item.code !== code),
     });
+    this.updatesCodes();
   }
 
   /**
@@ -69,7 +88,14 @@ class Store {
       list: this.state.list.map(item => {
         if (item.code === code) {
           item.selected = !item.selected;
+        } else {
+          item.selected = false;
         }
+
+        if (item.code === code && item.selected === true) {
+          item.highlighted = item.highlighted + 1;
+        }
+
         return item;
       }),
     });

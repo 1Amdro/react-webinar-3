@@ -20,8 +20,6 @@ class Store {
     };
   }
 
-  codeFormat() {}
-
   /**
    * Выбор состояния
    * @returns {Object}
@@ -40,6 +38,15 @@ class Store {
     for (const listener of this.listeners) listener();
   }
 
+  generateUniqNum() {
+    const randomNum = Math.floor(Math.random() * (100 - 8 + 1)) + 8;
+    const checkUniqNum = this.state.list.find(item => item.code === randomNum);
+    if (checkUniqNum) {
+      return this.generateUniqNum();
+    } else {
+      return randomNum;
+    }
+  }
   /**
    * Добавление новой записи
    */
@@ -49,20 +56,8 @@ class Store {
 
       list: [
         ...this.state.list,
-        { code: this.state.list.length + 1, highlighted: 0, title: 'Новая запись' },
+        { code: this.generateUniqNum(), highlighted: 0, title: 'Новая запись' },
       ],
-    });
-  }
-
-  updatesCodes() {
-    this.setState({
-      ...this.state,
-      list: this.state.list.map((item, index) => {
-        return {
-          ...item,
-          code: index + 1,
-        };
-      }),
     });
   }
 
@@ -75,7 +70,6 @@ class Store {
       ...this.state,
       list: this.state.list.filter(item => item.code !== code),
     });
-    this.updatesCodes();
   }
 
   /**

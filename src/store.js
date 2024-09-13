@@ -39,7 +39,7 @@ class Store {
   }
 
   generateUniqNum() {
-    const randomNum = Math.floor(Math.random() * (100 - 8 + 1)) + 8;
+    const randomNum = Math.floor(Math.random() * (100 - 0 + 1)) + 0;
     const checkUniqNum = this.state.list.find(item => item.code === randomNum);
     if (checkUniqNum) {
       return this.generateUniqNum();

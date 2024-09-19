@@ -1,66 +1,78 @@
-import React from 'react';
-import { createElement } from './utils.js';
-import './styles.css';
+import React, { useCallback, useState } from 'react';
+import List from './components/list';
+import Controls from './components/controls';
+import Head from './components/head';
+import PageLayout from './components/page-layout';
+import TheModal from './components/TheModal/TheModal.js';
 
 /**
  * Приложение
- * @param store {Store} Состояние приложения
+ * @param store {Store} Хранилище состояния приложения
  * @returns {React.ReactElement}
  */
 function App({ store }) {
   const list = store.getState().list;
+  const cardList = store.getState().shoppingCart;
+  const [modal, setModal] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
 
-  const textForm = count => {
-    if (count % 10 === 1 && count % 100 !== 11) {
-      return `${count} раз`;
-    } else if (count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)) {
-      return `${count} раза`;
-    } else {
-      return `${count} раз`;
-    }
+  function modalToggle() {
+    setModal(!modal);
+  }
+
+  const callbacks = {
+    onDeleteItem: useCallback(
+      code => {
+        store.deleteItem(code);
+      },
+      [store],
+    ),
+
+    onSelectItem: useCallback(
+      code => {
+        store.selectItem(code);
+      },
+      [store],
+    ),
+
+    onAddItem: useCallback(() => {
+      store.addItem();
+    }, [store]),
+
+    addToCart: useCallback(
+      (code, price) => {
+        setTotal(prev => prev + 1);
+        setTotalPrice(prev => prev + price);
+        store.addToCart(code);
+      },
+      [store],
+    ),
+    removeFromCart: useCallback(
+      (code, price) => {
+        store.removeFromCart(code);
+        if (total < 0) return;
+        setTotal(prev => prev - 1);
+        setTotalPrice(prev => prev - price);
+      },
+      [store],
+    ),
   };
 
   return (
-    <div className="App">
-      <div className="App-head">
-        <h1>Приложение на чистом JS</h1>
-      </div>
-      <div className="App-controls">
-        <button onClick={() => store.addItem()}>Добавить</button>
-      </div>
-      <div className="App-center">
-        <div className="List">
-          {list.map(item => (
-            <div key={item.code} className="List-item">
-              <div
-                className={'Item' + (item.selected ? ' Item_selected' : '')}
-                onClick={e => {
-                  if (e.target.tagName === 'BUTTON') return;
-                  store.selectItem(item.code);
-                }}
-              >
-                <div className="Item-code">{item.code}</div>
-                <div className="Item-title">
-                  {item.title}
-                  {item.highlighted ? (
-                    <span className="Item-highlighted">
-                      {' '}
-                      | Выделяли {textForm(item.highlighted)}
-                    </span>
-                  ) : (
-                    ''
-                  )}
-                </div>
-
-                <div className="Item-actions">
-                  <button onClick={() => store.deleteItem(item.code)}>Удалить</button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+    <PageLayout>
+      <Head title="Магазин" />
+      <Controls propClick={modalToggle} total={total} totalPrice={totalPrice} />
+      <List list={list} onClickItem={callbacks.addToCart} />
+      {modal && (
+        <TheModal
+          cardList={cardList}
+          modalToggle={modalToggle}
+          propRemoveFromCart={callbacks.removeFromCart}
+          totalPrice={totalPrice}
+        />
+      )}
+    </PageLayout>
   );
 }
 

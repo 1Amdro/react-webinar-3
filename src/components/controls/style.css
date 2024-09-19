@@ -1,0 +1,14 @@
+.Controls {
+  display: flex;
+  justify-content: flex-end;
+  padding: 20px;
+}
+
+.Controls-total {
+  margin-right: 15px;
+}
+
+.bold {
+  margin-left: 10px;
+  font-weight: 700;
+}

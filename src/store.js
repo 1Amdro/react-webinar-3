@@ -1,3 +1,5 @@
+import { generateCode } from './utils';
+
 /**
  * Хранилище состояния приложения
  */
@@ -38,27 +40,64 @@ class Store {
     for (const listener of this.listeners) listener();
   }
 
-  generateUniqNum() {
-    const randomNum = Math.floor(Math.random() * (100 - 0 + 1)) + 0;
-    const checkUniqNum = this.state.list.find(item => item.code === randomNum);
-    if (checkUniqNum) {
-      return this.generateUniqNum();
-    } else {
-      return randomNum;
-    }
-  }
   /**
    * Добавление новой записи
    */
   addItem() {
     this.setState({
       ...this.state,
-
-      list: [
-        ...this.state.list,
-        { code: this.generateUniqNum(), highlighted: 0, title: 'Новая запись' },
-      ],
+      list: [...this.state.list, { code: generateCode(), title: 'Новая запись' }],
     });
+  }
+
+  removeFromCart(code) {
+    const item = this.state.shoppingCart.find(item => item.code === code);
+
+    if (item.count > 1) {
+      this.setState({
+        ...this.state,
+        shoppingCart: this.state.shoppingCart.map(item => {
+          if (item.code === code) {
+            return {
+              ...item,
+              count: item.count - 1,
+            };
+          }
+          return item;
+        }),
+      });
+    } else {
+      this.setState({
+        ...this.state,
+        shoppingCart: this.state.shoppingCart.filter(item => item.code !== code),
+      });
+    }
+  }
+
+  addToCart(code) {
+    const item = this.state.list.find(item => item.code === code);
+
+    const newItem = this.state.shoppingCart?.find(item => item.code === code);
+
+    if (newItem) {
+      this.setState({
+        ...this.state,
+        shoppingCart: this.state.shoppingCart.map(item => {
+          if (item.code === code) {
+            return {
+              ...item,
+              count: item.count + 1,
+            };
+          }
+          return item;
+        }),
+      });
+    } else {
+      this.setState({
+        ...this.state,
+        shoppingCart: [...this.state.shoppingCart, { ...item, count: 1 }],
+      });
+    }
   }
 
   /**
@@ -68,6 +107,7 @@ class Store {
   deleteItem(code) {
     this.setState({
       ...this.state,
+      // Новый список, в котором не будет удаляемой записи
       list: this.state.list.filter(item => item.code !== code),
     });
   }
@@ -81,16 +121,15 @@ class Store {
       ...this.state,
       list: this.state.list.map(item => {
         if (item.code === code) {
-          item.selected = !item.selected;
-        } else {
-          item.selected = false;
+          // Смена выделения и подсчёт
+          return {
+            ...item,
+            selected: !item.selected,
+            count: item.selected ? item.count : item.count + 1 || 1,
+          };
         }
-
-        if (item.code === code && item.selected === true) {
-          item.highlighted = item.highlighted + 1;
-        }
-
-        return item;
+        // Сброс выделения если выделена
+        return item.selected ? { ...item, selected: false } : item;
       }),
     });
   }

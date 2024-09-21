@@ -36,7 +36,7 @@ function App({ store }) {
       [store],
     ),
 
-    onAddItem: useCallback(() => {
+   onAddItem: useCallback(() => {
       store.addItem();
     }, [store]),
 
@@ -60,7 +60,7 @@ function App({ store }) {
   };
 
   return (
-    <PageLayout>
+  <PageLayout>
       <Head title="Магазин" />
       <Controls propClick={modalToggle} total={total} totalPrice={totalPrice} />
       <List list={list} onClickItem={callbacks.addToCart} />
